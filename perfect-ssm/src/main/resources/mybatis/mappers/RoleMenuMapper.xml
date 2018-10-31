@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.RoleMenuDao">
+	<sql id="Base_Column_List">
+		`id`, `role_id`, `menu_id`
+	</sql>
+	
+	<resultMap type="RoleMenu" id="BaseResultMap">
+		<result property="id" column="id"/>
+		<result property="roleId" column="role_id"/>
+		<result property="menuId" column="menu_id"/>
+	</resultMap> 
+	
+	<select id="findMenuByRoleId" parameterType="Integer" resultMap="BaseResultMap">
+		SELECT 
+		<include refid="Base_Column_List" />
+		FROM sys_role_menu
+		WHERE role_id = #{0}
+	</select>
+	
+	<insert id="insertBatch" parameterType="List">
+		INSERT INTO sys_role_menu
+			(id, role_id, menu_id)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.id}, #{item.roleId}, #{item.menuId})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteByRoleId" parameterType="Integer">
+		DELETE FROM sys_role_menu
+		WHERE role_id = #{0}
+	</delete>
+	
+</mapper>

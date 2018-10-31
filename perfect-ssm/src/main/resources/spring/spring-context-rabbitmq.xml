@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xsi:schemaLocation="http://www.springframework.org/schema/rabbit
+	http://www.springframework.org/schema/rabbit/spring-rabbit-1.4.xsd
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+	
+	<!-- 定义RabbitMQ的连接工厂 -->
+	<rabbit:connection-factory id="connectionFactory"
+		host="${rabbit.ip}" port="${rabbit.port}" username="${rabbit.username}" password="${rabbit.password}"
+		virtual-host="${rabbit.vhost}" />
+
+	<!-- MQ的管理，包括队列、交换器等 -->
+	<rabbit:admin connection-factory="connectionFactory" />
+	
+	<!-- 定义消息队列 -->
+	<rabbit:queue id="sws_wx" name="wx_user" auto-declare="true" auto-delete="false" exclusive="false"/>
+	
+	<!-- 声明一个topic类型的exchange，并把上面声明的队列绑定在上面，routingKey="foo.*" -->
+    <rabbit:topic-exchange name="swsExchange">
+        <rabbit:bindings>
+            <rabbit:binding queue="wx_user" pattern="user.*" />
+            <!-- 这里还可以继续绑定其他队列 -->
+        </rabbit:bindings>
+    </rabbit:topic-exchange>
+	
+	<!-- 定义Rabbit模板，指定连接工厂以及定义exchange -->
+	<rabbit:template id="amqpTemplate" connection-factory="connectionFactory"
+		exchange="swsExchange" />
+		
+	<!-- <bean id= "wxLoginConsumer" name="wxLoginConsumer" class="com.xmxy.wx.consumer.WxLoginConsumer"></bean> -->
+	<!-- 定义监听 -->
+	 <rabbit:listener-container connection-factory="connectionFactory">
+		<rabbit:listener ref="wxUserConsumer" queues="wx_user" />
+	</rabbit:listener-container> 
+	
+	<!-- 配置监听容器，指定消息处理类，处理方法，还可以配置自动确认等-->
+    <!-- <rabbit:listener-container connection-factory="connectionFactory">
+        <rabbit:listener ref="amqpConsumer" method="listen" queue-names="myQueue" /> -->
+        <!-- 可以继续注册监听 -->
+   <!--  </rabbit:listener-container> -->
+    
+</beans>

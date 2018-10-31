@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.promotion.core.dao.MenuDao">
+	<sql id="Base_Column_List">
+		id, type, `parent_id` as parentId, `title`, `icon`, `path`, `name`, `description`, `t_order` as tOrder,
+		 `create_time` as createTime,
+		 `create_by` as createBy,
+		 `update_time` as updateTime,
+		 `update_by` as updateBy
+	</sql>
+	
+	<insert id="insert" parameterType="com.ssm.promotion.core.entity.Menu">
+		INSERT INTO sys_menu 
+			(id, type, parent_id, title, icon, path, name, description, create_time, create_by, update_time, update_by, t_order)
+			VALUES ( 
+					 #{id, jdbcType=INTEGER}, 
+					 #{type, jdbcType=INTEGER},
+					 #{parentId, jdbcType=INTEGER},
+					 #{title},
+					 #{icon},
+					 #{path},
+					 #{name},
+					 #{description},
+					 #{createTime},
+					 #{createBy},
+					 #{updateTime},
+					 #{updateBy},
+					 #{tOrder}
+					 )
+					 
+	</insert>
+	
+	<update id='update' parameterType='com.ssm.promotion.core.entity.Menu'>
+		UPDATE sys_menu 
+		<set>
+			<if test="type != null and type!=''">
+				type= #{type,jdbcType=INTEGER},
+			</if>
+			<if test="parentId != null and parentId!=''">
+				parent_id = #{parentId,jdbcType=INTEGER},
+			</if>
+			<if test="title != null and title!=''">
+				title = #{title},
+			</if>
+			<if test="icon != null and icon!=''">
+				icon = #{icon},
+			</if>
+			<if test="path != null and path!=''">
+				path = #{path},
+			</if>
+			<if test="name != null and name!=''">
+				name = #{name},
+			</if>
+			<if test="description != null and description!=''">
+				description = #{description},
+			</if>
+			<if test="createTime != null and createTime!=''">
+				create_time = #{createTime},
+			</if>
+			<if test="createBy != null and createBy!=''">
+				create_by = #{createBy},
+			</if>
+			<if test="updateTime != null and updateTime!=''">
+				update_time = #{updateTime},
+			</if>
+			<if test="updateBy != null and updateBy!=''">
+				update_by = #{updateBy},
+			</if>
+			<if test="tOrder != null">
+				t_order = #{tOrder}
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+	
+	<delete id='delete' parameterType="java.lang.Integer">
+		DELETE FROM sys_menu WHERE id = #{id}
+	</delete>
+	
+	<select id="findParentMenus" resultType="com.ssm.promotion.core.entity.Menu">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM sys_menu
+		WHERE type = 0
+	</select>
+	
+	<select id="getMenuById" parameterType="int" resultType="com.ssm.promotion.core.entity.Menu">
+		SELECT 
+		<include refid="Base_Column_List" />
+		FROM sys_menu
+		WHERE id = #{0}
+	</select>
+	
+	<select id="findMenusByRole" resultType="com.ssm.promotion.core.entity.Menu" parameterType="List">
+		SELECT 
+		<include refid="Base_Column_List" /> 
+		FROM sys_menu 
+		WHERE id IN
+		<foreach collection="list" item="item" open="(" close=")" separator=",">
+			#{item.menuId}
+		</foreach>
+		ORDER BY t_order DESC;
+	</select>
+	
+	<select id="findMenusByParentId" parameterType="int" resultType="com.ssm.promotion.core.entity.Menu">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM sys_menu
+		WHERE parent_id = #{id}
+		ORDER BY create_time 
+	</select>
+	
+	<!-- datagrid -->
+	<select id="findAllMenus" resultType="com.ssm.promotion.core.entity.Menu" parameterType="Map">
+		SELECT 
+		<include refid="Base_Column_List" /> 
+		FROM sys_menu 
+		<where>
+			<if test="condition != null and condition != ''">
+				AND title LIKE #{condition}
+			</if>
+		</where>
+		<choose>
+			<when test="orderByStmt != null">
+				ORDER BY ${orderByStmt}
+			</when>
+			<otherwise>
+				ORDER BY t_order 
+			</otherwise>
+		</choose>
+		<if test="pageNum != null and pageSize != null">
+			LIMIT #{pageNum},#{pageSize}
+		</if>
+	</select>
+	
+	<select id="getTotalMenu" parameterType="Map" resultType="Long">
+		SELECT count(*) FROM sys_menu
+		<where>
+			<if test="condition != null and condition != ''">
+				AND title LIKE #{condition}
+			</if>
+		</where>
+	</select>
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.ssm.promotion.core.dao.RoleDao">
+
+	<sql id="Base_Column_List">
+		`id`, `grade`, `role_name` as roleName, `is_used` as isUsed, description,
+		 `create_time` as createTime,
+		 `create_by` as createBy,
+		 `update_time` as updateTime,
+		 `update_by` as updateBy  
+	</sql>
+	
+	<select id="getRoleById" parameterType="java.lang.Integer" resultType="com.ssm.promotion.core.entity.Role">
+		SELECT 
+		<include refid="Base_Column_List" />
+		FROM sys_role
+		WHERE id = #{id}
+	</select>
+	
+	<select id="getRoleByGrade" resultType="com.ssm.promotion.core.entity.Role" parameterType="java.lang.Integer">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM sys_role
+		WHERE grade = #{0}
+		AND is_used = 1
+	</select>
+	
+	<select id="findAllRoles" resultType="com.ssm.promotion.core.entity.Role">
+		SELECT 
+		<include refid="Base_Column_List" />
+		FROM sys_role
+	</select>
+	
+	<insert id="insert" parameterType="com.ssm.promotion.core.entity.Role">
+		INSERT INTO sys_role(`grade`, `role_name`, `is_used`, `description`, `create_time`, `create_by`, `update_time`, `update_by`)
+		VALUES( #{grade}, #{roleName}, #{isUsed}, #{description}, #{createTime}, #{createBy}, #{updateTime}, #{updateBy} )
+	</insert>
+	
+	<update id="update" parameterType="com.ssm.promotion.core.entity.Role">
+		UPDATE sys_role
+		<set>
+			<if test="grade != null and grade != ''">
+				grade = #{grade},
+			</if>
+			<if test="roleName != null and roleName != ''">
+				role_name = #{roleName},
+			</if>
+			<if test="description != null and description != ''">
+				description = #{description},
+			</if>
+			<if test="updateTime != null and updateTime != ''">
+				update_time = #{updateTime},
+			</if>
+			<if test="updateBy != null and updateBy != ''">
+				update_by = #{updateBy},
+			</if>
+			<if test="isUsed != null">
+				is_used = #{isUsed}
+			</if>
+		</set>
+		WHERE `id` = #{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+		DELETE FROM sys_role WHERE id = #{0}
+	</delete>
+	
+	<select id="dataGrid" parameterType="Map" resultType="com.ssm.promotion.core.entity.Role">
+		SELECT 
+		<include refid="Base_Column_List" /> 
+		FROM sys_role 
+		<where>
+			<if test="condition != null and condition != ''">
+				AND role_name LIKE #{condition}
+			</if>
+		</where>
+		<choose>
+			<when test="orderByStmt != null">
+				ORDER BY ${orderByStmt}
+			</when>
+			<otherwise>
+				ORDER BY create_time 
+			</otherwise>
+		</choose>
+		<if test="pageNum != null and pageSize != null">
+			LIMIT #{pageNum},#{pageSize}
+		</if>
+	</select>
+	
+	<select id="getTotal" parameterType="Map" resultType="Long">
+		SELECT count(*) FROM sys_role
+		<where>
+			<if test="condition != null and condition != ''">
+				AND role_name LIKE #{condition}
+			</if>
+		</where>
+	</select>
+</mapper>
